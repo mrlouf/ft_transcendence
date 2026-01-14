@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+         #
+#    By: nicolas <nicolas@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/28 13:10:42 by nponchon          #+#    #+#              #
-#    Updated: 2025/07/22 12:49:46 by nponchon         ###   ########.fr        #
+#    Updated: 2026/01/14 18:19:53 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,11 +14,7 @@
 prod:
 	@bash ./scripts/setup_prod.sh
 	@bash ./scripts/generate_certs.sh
-	@COMPOSE_BAKE=true docker compose --env-file ./containers/.env -f ./containers/docker-compose.yml -f ./containers/docker-compose.prod.yml up -d --build
-
-dev:
-	@bash ./scripts/setup_dev.sh
-	COMPOSE_BAKE=true docker compose --env-file ./containers/.env -f ./containers/docker-compose.yml -f ./containers/docker-compose.dev.yml up -d --build
+	@COMPOSE_BAKE=true docker compose --env-file ./containers/.env -f ./containers/docker-compose.yml up -d --build
 
 # tunnel:
 # 	@if ! command -v cloudflared >/dev/null 2>&1; then \

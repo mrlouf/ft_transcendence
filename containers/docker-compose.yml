@@ -37,13 +37,15 @@ services:
   nginx:
     build: ./nginx
     container_name: nginx
-    #ports:
-      #- "80:80"
-      #- "443:443"
+    ports:
+      - "80:80"
+      - "443:443"
     restart: always
     environment:
       - ADMIN_EMAIL=${ADMIN_EMAIL}
     depends_on:
+      frontend:
+        condition: service_started
       backend:
         condition: service_healthy
     volumes:
@@ -55,11 +57,18 @@ services:
 #                       FRONTEND                        #
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        - NODE_ENV=production
     container_name: frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=production
     volumes:
-      - public:/app/public
-    restart: on-failure    
+      - ./frontend:/app
+      - /app/node_modules
     networks:
       - transcendence
 
@@ -71,10 +80,16 @@ services:
     ports:
       - "3100:3100"
     volumes:
+      - ./backend:/usr/src/app:consistent
       - userbase:/usr/src/app/db
+      - /usr/src/app/node_modules
       - ./frontend/static/avatars:/usr/src/app/public/avatars
     env_file:
       - .env
+    environment:
+      - NODE_ENV=production
+      - SESSION_SECRET=${SESSION_SECRET}
+      - DOMAIN_NAME=${DOMAIN_NAME}
     restart: always
     networks:
       - transcendence
@@ -129,10 +144,14 @@ services:
     ports:
       - "3002:3002"
     environment:
-      AVALANCHE_RPC_URL: "https://api.avax-test.network/ext/bc/C/rpc"
-      PRIVATE_KEY: ${BLOCKCHAIN_PRIVATE_KEY}
-      FASTIFY_PORT: 3002
-      FASTIFY_ADDRESS: "127.0.0.1"
+      - AVALANCHE_RPC_URL="https://api.avax-test.network/ext/bc/C/rpc"
+      - PRIVATE_KEY=${BLOCKCHAIN_PRIVATE_KEY}
+      - FASTIFY_PORT=3002
+      - FASTIFY_ADDRESS=127.0.0.1
+      - NODE_ENV=production
+      - AVALANCHE_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
+      - PRIVATE_KEY=${BLOCKCHAIN_PRIVATE_KEY}
+      - BLOCKCHAIN_PRIVATE_KEY=${BLOCKCHAIN_PRIVATE_KEY}
     volumes:
       - ./blockchain:/usr/src/app
       - /usr/src/app/node_modules
